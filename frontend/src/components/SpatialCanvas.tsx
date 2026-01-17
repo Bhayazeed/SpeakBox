@@ -2,7 +2,6 @@ import { useRef, useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useSocket, useAppState } from '../hooks/useSocket';
 import { useSpatialAudio } from '../hooks/useSpatialAudio';
-import { BlurOverlay } from './BlurOverlay';
 import { Howler } from 'howler';
 import { ReplyModal } from './ReplyModal';
 import { LogOut } from 'lucide-react';
@@ -37,27 +36,31 @@ export const SpatialCanvas = ({ roomId, roomData, username, onExit }: SpatialCan
     const { nodes, users } = useAppState();
 
     // Seed nodes based on room - RESET when entering a new room
+    // Neo-brutalist color palette for nodes
+    const BRUTAL_COLORS = ['#FFE600', '#0066FF', '#FF4D6D', '#00D26A', '#9747FF', '#FF6B35', '#00C2FF'];
+
     useEffect(() => {
+        const getRandomColor = () => BRUTAL_COLORS[Math.floor(Math.random() * BRUTAL_COLORS.length)];
+
         // Custom room - use opening question from roomData
         if (roomData && roomId.startsWith('custom-')) {
-            const hue = Math.floor(Math.random() * 360);
             useAppState.getState().setNodes([
                 {
                     id: '1',
                     x: window.innerWidth / 2,
                     y: window.innerHeight / 2,
-                    color: `hsl(${hue}, 80%, 60%)`,
+                    color: getRandomColor(),
                     text: roomData.opening_question || roomData.topic,
-                    audioUrl: roomData.audioUrl // Pass the recorded audio!
+                    audioUrl: roomData.audioUrl
                 }
             ]);
         } else if (roomId === 'room-a') {
             useAppState.getState().setNodes([
-                { id: '1', x: window.innerWidth / 2, y: window.innerHeight / 2, color: '#00f3ff', text: "Is free will an illusion? Share your perspective." }
+                { id: '1', x: window.innerWidth / 2, y: window.innerHeight / 2, color: '#0066FF', text: "Is free will an illusion? Share your perspective." }
             ]);
         } else if (roomId === 'room-b') {
             useAppState.getState().setNodes([
-                { id: '2', x: window.innerWidth / 2, y: window.innerHeight / 2, color: '#bc13fe', text: "Should AI be regulated? Debate the policy." }
+                { id: '2', x: window.innerWidth / 2, y: window.innerHeight / 2, color: '#9747FF', text: "Should AI be regulated? Debate the policy." }
             ]);
         }
     }, [roomId, roomData]);
@@ -84,9 +87,8 @@ export const SpatialCanvas = ({ roomId, roomData, username, onExit }: SpatialCan
         const angle = Math.random() * Math.PI * 2;
         const offset = 400;
 
-        // Generate Random Neon Color
-        const hue = Math.floor(Math.random() * 360);
-        const randomColor = `hsl(${hue}, 100%, 60%)`;
+        // Pick random brutalist color
+        const randomColor = BRUTAL_COLORS[Math.floor(Math.random() * BRUTAL_COLORS.length)];
 
         const displayName = username || 'You';
         const newUserNode = {
@@ -223,10 +225,17 @@ export const SpatialCanvas = ({ roomId, roomData, username, onExit }: SpatialCan
     return (
         <div
             ref={containerRef}
-            className="relative w-full h-full bg-slate-950 overflow-hidden cursor-crosshair selection:bg-neon-blue selection:text-black"
+            className="relative w-full h-full bg-brutal-cream overflow-auto cursor-crosshair"
             onMouseMove={handleMouseMove}
+            style={{
+                backgroundImage: 'linear-gradient(#1a1a1a 2px, transparent 2px), linear-gradient(90deg, #1a1a1a 2px, transparent 2px)',
+                backgroundSize: '60px 60px',
+                backgroundPosition: 'center center',
+                minWidth: '200vw',
+                minHeight: '200vh'
+            }}
         >
-            <BlurOverlay minDistance={minDistance} maxDistance={300} />
+            {/* No blur overlay for neo-brutalism - clean and sharp */}
 
             <ReplyModal
                 isOpen={isReplyModalOpen}
@@ -249,38 +258,37 @@ export const SpatialCanvas = ({ roomId, roomData, username, onExit }: SpatialCan
                             y1={parent.y}
                             x2={node.x}
                             y2={node.y}
-                            stroke={node.color}
-                            strokeWidth="3"
-                            strokeOpacity="0.6"
-                            strokeDasharray="8,8"
+                            stroke="#1a1a1a"
+                            strokeWidth="4"
+                            strokeOpacity="1"
                         />
                     );
                 })}
             </svg>
 
-            {/* Render Nodes */}
+            {/* Render Nodes - Neo Brutalist Squares */}
             {nodes.map(node => (
                 <motion.div
                     key={node.id}
-                    className="absolute rounded-full shadow-[0_0_50px_rgba(0,0,0,0.8)] flex items-center justify-center group"
+                    className="absolute flex items-center justify-center group border-4 border-brutal-black"
                     style={{
                         left: node.x,
                         top: node.y,
-                        width: 80, // Increased from 60
-                        height: 80, // Increased from 60
+                        width: 90,
+                        height: 90,
                         x: '-50%',
                         y: '-50%',
                         backgroundColor: node.color,
-                        boxShadow: `0 0 40px ${node.color}, inset 0 0 20px rgba(255,255,255,0.8)`
+                        boxShadow: '6px 6px 0px #1a1a1a'
                     }}
-                    animate={{
-                        scale: [1, 1.1, 1],
-                        opacity: [0.8, 1, 0.8]
+                    whileHover={{
+                        scale: 1.05,
+                        boxShadow: '8px 8px 0px #1a1a1a'
                     }}
                     transition={{
-                        duration: 4,
-                        repeat: Infinity,
-                        ease: "easeInOut"
+                        type: 'spring',
+                        stiffness: 400,
+                        damping: 20
                     }}
                 >
                     {/* Tooltip / Interaction Ring */}
@@ -306,26 +314,28 @@ export const SpatialCanvas = ({ roomId, roomData, username, onExit }: SpatialCan
                                 />
                             </svg>
 
+                            {/* Tooltip - Neo Brutalist */}
                             <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="absolute top-24 w-80 p-6 rounded-2xl bg-glass-200 backdrop-blur-xl border border-glass-100/50 text-sm text-white z-50 pointer-events-auto shadow-[0_10px_40px_rgba(0,0,0,0.5)]"
+                                className="absolute top-28 w-80 p-5 bg-brutal-white border-brutal-thick shadow-brutal-lg text-sm text-brutal-black z-50 pointer-events-auto"
                             >
-                                <p className="font-semibold mb-2 text-neon-blue">Voice Summary</p>
-                                <p className="mb-3">{node.text}</p>
+                                <p className="font-bold mb-2 text-brutal-blue uppercase text-xs tracking-wider">Voice Summary</p>
+                                <p className="mb-4 font-medium leading-relaxed">{node.text}</p>
 
                                 {canReply ? (
                                     <button
-                                        className="w-full py-2 bg-neon-blue/80 hover:bg-neon-blue text-black font-bold rounded-lg transition-all shadow-[0_0_15px_rgba(0,243,255,0.4)]"
+                                        className="w-full py-3 bg-brutal-blue border-brutal shadow-brutal text-brutal-white font-bold uppercase hover:translate-x-1 hover:translate-y-1 hover:shadow-brutal-sm transition-all"
                                         onClick={() => setIsReplyModalOpen(true)}
                                     >
-                                        REPLY NOW
+                                        Reply Now
                                     </button>
                                 ) : (
-                                    <p className="text-xs text-center opacity-50">Listening... {Math.round(focusTimer)}%</p>
+                                    <p className="text-xs text-center text-brutal-black/50 font-bold uppercase">Listening... {Math.round(focusTimer)}%</p>
                                 )}
-                                <div className="mt-2 text-[10px] text-center text-white/30 uppercase tracking-widest">
-                                    {canReply ? 'Press Space' : 'Press R to reply instantly'}
+                                <div className="mt-3 flex justify-center gap-4 text-[10px] text-brutal-black/40 uppercase tracking-widest font-bold">
+                                    <span><kbd className="px-1.5 py-0.5 bg-brutal-gray border border-brutal-black">R</kbd> Reply</span>
+                                    <span><kbd className="px-1.5 py-0.5 bg-brutal-gray border border-brutal-black">Space</kbd> Send</span>
                                 </div>
                             </motion.div>
                         </>
@@ -346,17 +356,17 @@ export const SpatialCanvas = ({ roomId, roomData, username, onExit }: SpatialCan
                 />
             ))}
 
-            {/* HUD / Debug Info */}
-            <div className="absolute bottom-4 left-4 text-xs text-white/30 font-mono pointer-events-none">
-                POS: {mousePos.x}, {mousePos.y} | MIN_DIST: {Math.round(minDistance)} | FOCUS: {focusedNodeId || 'NONE'} | ROOM: {roomId}
+            {/* HUD / Debug Info - Neo Brutalist */}
+            <div className="absolute bottom-4 left-4 px-3 py-2 bg-brutal-black/80 border-2 border-brutal-white/30 text-xs text-brutal-white/50 font-bold uppercase pointer-events-none">
+                ROOM: {roomId} | FOCUS: {focusedNodeId || 'NONE'}
             </div>
 
-            {/* Exit Button */}
+            {/* Exit Button - Neo Brutalist */}
             <button
                 onClick={onExit}
-                className="absolute top-6 left-6 flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white/50 hover:text-white transition-all z-50 text-xs uppercase tracking-widest backdrop-blur-md"
+                className="absolute top-6 left-6 flex items-center gap-2 px-5 py-3 bg-brutal-white border-brutal shadow-brutal text-brutal-black font-bold uppercase hover:translate-x-1 hover:translate-y-1 hover:shadow-brutal-sm transition-all z-50 text-xs tracking-widest"
             >
-                <LogOut size={14} /> Exit Room
+                <LogOut size={16} strokeWidth={3} /> Exit Room
             </button>
         </div>
     );

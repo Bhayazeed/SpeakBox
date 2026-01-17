@@ -44,13 +44,13 @@ function App() {
           />
         )}
 
-        {/* Connection Indicator */}
-        <div className={`fixed bottom-6 right-6 px-3 py-1 rounded-full text-[10px] font-mono tracking-widest uppercase border backdrop-blur-md z-[100] ${isConnected
-          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.2)]'
-          : 'bg-rose-500/10 border-rose-500/30 text-rose-500'
+        {/* Connection Indicator - Neo Brutalist */}
+        <div className={`fixed bottom-6 right-6 px-4 py-2 text-xs font-bold uppercase tracking-widest border-brutal shadow-brutal z-[100] ${isConnected
+          ? 'bg-brutal-green text-brutal-black'
+          : 'bg-brutal-pink text-brutal-black'
           }`}>
           <div className="flex items-center gap-2">
-            <div className={`w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
+            <div className={`w-2 h-2 ${isConnected ? 'bg-brutal-black animate-pulse' : 'bg-brutal-black'}`} />
             {isConnected ? 'LIVE' : 'OFFLINE'}
           </div>
         </div>

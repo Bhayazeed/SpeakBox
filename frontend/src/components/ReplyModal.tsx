@@ -17,27 +17,24 @@ export const ReplyModal = ({ isOpen, onClose, nodeId, onReply }: ReplyModalProps
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const chunksRef = useRef<Blob[]>([]);
 
-    // Visualizer animation
-    const [visualizerData, setVisualizerData] = useState<number[]>(new Array(20).fill(10));
+    const [visualizerData, setVisualizerData] = useState<number[]>(new Array(16).fill(10));
 
     useEffect(() => {
         if (isRecording) {
             const interval = setInterval(() => {
-                setVisualizerData(prev => prev.map(() => Math.random() * 50 + 10));
+                setVisualizerData(prev => prev.map(() => Math.random() * 60 + 10));
             }, 100);
             return () => clearInterval(interval);
         } else if (isProcessing) {
-            // Pulsing animation while processing
             const interval = setInterval(() => {
-                setVisualizerData(prev => prev.map((_, i) => 20 + Math.sin(Date.now() / 200 + i) * 15));
+                setVisualizerData(prev => prev.map((_, i) => 30 + Math.sin(Date.now() / 200 + i) * 20));
             }, 50);
             return () => clearInterval(interval);
         } else {
-            setVisualizerData(new Array(20).fill(10));
+            setVisualizerData(new Array(16).fill(10));
         }
     }, [isRecording, isProcessing]);
 
-    // Reset state when modal opens
     useEffect(() => {
         if (isOpen) {
             setAudioBlob(null);
@@ -51,7 +48,6 @@ export const ReplyModal = ({ isOpen, onClose, nodeId, onReply }: ReplyModalProps
         if (!isOpen) return;
 
         const handleKeyDown = (e: KeyboardEvent) => {
-            // R: Toggle recording (only when not processing and no blob yet)
             if (e.code === 'KeyR' && !isProcessing) {
                 e.preventDefault();
                 if (!audioBlob) {
@@ -63,13 +59,11 @@ export const ReplyModal = ({ isOpen, onClose, nodeId, onReply }: ReplyModalProps
                 }
             }
 
-            // Enter: Send when recording is done
             if (e.code === 'Enter' && audioBlob && !isProcessing) {
                 e.preventDefault();
                 handleSend();
             }
 
-            // Escape: Close modal (if not processing)
             if (e.code === 'Escape' && !isProcessing) {
                 e.preventDefault();
                 onClose();
@@ -119,7 +113,6 @@ export const ReplyModal = ({ isOpen, onClose, nodeId, onReply }: ReplyModalProps
         setError(null);
 
         try {
-            // Upload audio to backend for AI processing
             const formData = new FormData();
             formData.append('file', audioBlob, 'recording.webm');
 
@@ -131,23 +124,19 @@ export const ReplyModal = ({ isOpen, onClose, nodeId, onReply }: ReplyModalProps
             const data = await response.json();
 
             if (data.success) {
-                // Create local URL for playback
                 const audioUrl = URL.createObjectURL(audioBlob);
-                // Use AI summary if available, otherwise use transcript or default
                 const summary = data.summary || data.transcript || "Voice Reply";
 
                 onReply(audioUrl, summary);
                 onClose();
             } else {
                 setError(data.error || "Failed to process audio");
-                // Fallback: still allow sending without AI summary
                 const audioUrl = URL.createObjectURL(audioBlob);
                 onReply(audioUrl, "Voice Reply (processing failed)");
                 onClose();
             }
         } catch (err) {
             console.error("Error uploading audio:", err);
-            // Fallback: send without AI summary
             const audioUrl = URL.createObjectURL(audioBlob);
             onReply(audioUrl, "Voice Reply");
             onClose();
@@ -166,45 +155,47 @@ export const ReplyModal = ({ isOpen, onClose, nodeId, onReply }: ReplyModalProps
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                        className="absolute inset-0 bg-brutal-black/80"
                         onClick={!isProcessing ? onClose : undefined}
                     />
 
-                    {/* Modal Content */}
+                    {/* Modal Content - Neo Brutalist */}
                     <motion.div
                         initial={{ scale: 0.9, opacity: 0, y: 20 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                        className="relative w-full max-w-md p-8 rounded-3xl bg-slate-900 border border-white/10 shadow-2xl overflow-hidden"
+                        className="relative w-full max-w-md p-8 bg-brutal-white border-brutal-thick shadow-brutal-xl"
                     >
                         {!isProcessing && (
-                            <button onClick={onClose} className="absolute top-4 right-4 text-white/50 hover:text-white">
-                                <X size={24} />
+                            <button
+                                onClick={onClose}
+                                className="absolute top-4 right-4 w-10 h-10 bg-brutal-pink border-brutal flex items-center justify-center hover:translate-x-0.5 hover:translate-y-0.5 transition-transform"
+                            >
+                                <X size={20} strokeWidth={3} />
                             </button>
                         )}
 
-                        <h2 className="text-2xl font-bold text-center mb-2 text-white">
-                            {isProcessing ? "Processing with AI..." : "Record Your Reply"}
+                        <h2 className="text-2xl font-bold text-center mb-2 text-brutal-black uppercase">
+                            {isProcessing ? "Processing..." : "Record Reply"}
                         </h2>
-                        <p className="text-center text-white/50 text-sm mb-8">
-                            {isProcessing ? "Transcribing and summarizing your voice" : `Replying to Node ${nodeId}`}
+                        <p className="text-center text-brutal-black/60 text-sm mb-8 font-medium">
+                            {isProcessing ? "AI is summarizing your voice" : `Replying to Node ${nodeId}`}
                         </p>
 
-                        {/* Error Message */}
                         {error && (
-                            <div className="mb-4 p-3 rounded-lg bg-red-500/20 border border-red-500/30 text-red-300 text-sm text-center">
+                            <div className="mb-4 p-3 bg-brutal-pink border-brutal text-brutal-black text-sm text-center font-bold">
                                 {error}
                             </div>
                         )}
 
-                        {/* Visualizer */}
-                        <div className="flex justify-center items-end gap-1 h-32 mb-8">
+                        {/* Visualizer - Neo Brutalist bars */}
+                        <div className="flex justify-center items-end gap-1 h-24 mb-8 bg-brutal-black p-4 border-brutal">
                             {visualizerData.map((height, i) => (
                                 <motion.div
                                     key={i}
-                                    className={`w-2 rounded-full ${isProcessing ? 'bg-purple-500' : 'bg-neon-blue'}`}
+                                    className={`w-3 ${isProcessing ? 'bg-brutal-purple' : isRecording ? 'bg-brutal-pink' : 'bg-brutal-cyan'}`}
                                     animate={{ height }}
-                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                    transition={{ type: "spring", stiffness: 400, damping: 20 }}
                                 />
                             ))}
                         </div>
@@ -212,55 +203,55 @@ export const ReplyModal = ({ isOpen, onClose, nodeId, onReply }: ReplyModalProps
                         {/* Controls */}
                         <div className="flex justify-center gap-4">
                             {isProcessing ? (
-                                <div className="flex items-center gap-3 text-white/70">
+                                <div className="flex items-center gap-3 text-brutal-black font-bold">
                                     <Loader2 className="animate-spin" size={24} />
-                                    <span>AI is analyzing your voice...</span>
+                                    <span>AI analyzing...</span>
                                 </div>
                             ) : !audioBlob ? (
                                 <button
                                     onClick={isRecording ? stopRecording : startRecording}
-                                    className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${isRecording
-                                        ? 'bg-red-500 shadow-[0_0_30px_rgba(255,0,0,0.5)]'
-                                        : 'bg-white text-black hover:bg-neon-blue hover:text-white'
+                                    className={`w-20 h-20 border-brutal-thick flex items-center justify-center transition-all shadow-brutal hover:translate-x-1 hover:translate-y-1 hover:shadow-brutal-sm ${isRecording
+                                        ? 'bg-brutal-pink'
+                                        : 'bg-brutal-white hover:bg-brutal-yellow'
                                         }`}
                                 >
-                                    {isRecording ? <Square fill="currentColor" size={24} /> : <Mic size={32} />}
+                                    {isRecording ? <Square fill="currentColor" size={32} /> : <Mic size={40} strokeWidth={2.5} />}
                                 </button>
                             ) : (
                                 <div className="flex gap-4 w-full">
                                     <button
                                         onClick={() => setAudioBlob(null)}
-                                        className="flex-1 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium transition-colors"
+                                        className="flex-1 py-3 bg-brutal-gray border-brutal shadow-brutal-sm hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none text-brutal-black font-bold uppercase transition-all"
                                     >
                                         Rerecord
                                     </button>
                                     <button
                                         onClick={handleSend}
-                                        className="flex-1 py-3 rounded-xl bg-neon-blue hover:bg-neon-blue/80 text-black font-bold flex items-center justify-center gap-2 transition-colors shadow-[0_0_20px_rgba(0,243,255,0.3)]"
+                                        className="flex-1 py-3 bg-brutal-green border-brutal shadow-brutal hover:translate-x-1 hover:translate-y-1 hover:shadow-brutal-sm text-brutal-black font-bold uppercase flex items-center justify-center gap-2 transition-all"
                                     >
-                                        Send <Send size={18} />
+                                        Send <Send size={18} strokeWidth={3} />
                                     </button>
                                 </div>
                             )}
                         </div>
 
                         {/* Hotkey hints */}
-                        <div className="flex justify-center gap-4 mt-4 text-[10px] text-white/40 uppercase tracking-wider">
+                        <div className="flex justify-center gap-4 mt-6 text-xs text-brutal-black/50 uppercase tracking-wider font-bold">
                             <span className="flex items-center gap-1">
-                                <kbd className="px-1.5 py-0.5 bg-white/10 rounded text-white/60">R</kbd> Record
+                                <kbd className="px-2 py-1 bg-brutal-gray border-2 border-brutal-black text-brutal-black">R</kbd> Record
                             </span>
                             {audioBlob && (
                                 <span className="flex items-center gap-1">
-                                    <kbd className="px-1.5 py-0.5 bg-white/10 rounded text-white/60">Enter</kbd> Send
+                                    <kbd className="px-2 py-1 bg-brutal-gray border-2 border-brutal-black text-brutal-black">↵</kbd> Send
                                 </span>
                             )}
                             <span className="flex items-center gap-1">
-                                <kbd className="px-1.5 py-0.5 bg-white/10 rounded text-white/60">Esc</kbd> Close
+                                <kbd className="px-2 py-1 bg-brutal-gray border-2 border-brutal-black text-brutal-black">Esc</kbd> Close
                             </span>
                         </div>
 
                         {/* AI Info */}
-                        <p className="text-center text-white/30 text-xs mt-4">
+                        <p className="text-center text-brutal-black/40 text-xs mt-4 font-bold uppercase">
                             Powered by Gemini AI
                         </p>
                     </motion.div>

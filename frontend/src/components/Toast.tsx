@@ -29,7 +29,6 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
         const id = Date.now().toString();
         setToasts(prev => [...prev, { id, message, type }]);
 
-        // Auto remove after 4 seconds
         setTimeout(() => {
             setToasts(prev => prev.filter(t => t.id !== id));
         }, 4000);
@@ -39,11 +38,23 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
         setToasts(prev => prev.filter(t => t.id !== id));
     };
 
+    // Neo-brutalist color mapping
+    const getToastColors = (type: 'success' | 'error' | 'info') => {
+        switch (type) {
+            case 'success':
+                return 'bg-brutal-green';
+            case 'error':
+                return 'bg-brutal-pink';
+            case 'info':
+                return 'bg-brutal-cyan';
+        }
+    };
+
     return (
         <ToastContext.Provider value={{ showToast }}>
             {children}
 
-            {/* Toast Container */}
+            {/* Toast Container - Neo Brutalist */}
             <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[200] flex flex-col gap-3 pointer-events-none">
                 <AnimatePresence>
                     {toasts.map(toast => (
@@ -52,26 +63,17 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
                             initial={{ opacity: 0, y: 20, scale: 0.9 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: -20, scale: 0.9 }}
-                            className={`px-6 py-3 rounded-2xl backdrop-blur-xl border shadow-2xl flex items-center gap-3 pointer-events-auto ${toast.type === 'success'
-                                ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-300'
-                                : toast.type === 'error'
-                                    ? 'bg-red-500/20 border-red-500/30 text-red-300'
-                                    : 'bg-neon-blue/20 border-neon-blue/30 text-neon-blue'
-                                }`}
+                            className={`px-6 py-3 border-brutal shadow-brutal flex items-center gap-3 pointer-events-auto ${getToastColors(toast.type)} text-brutal-black`}
                         >
-                            {toast.type === 'success' ? (
-                                <CheckCircle size={20} />
-                            ) : toast.type === 'error' ? (
-                                <AlertCircle size={20} />
-                            ) : (
-                                <AlertCircle size={20} />
-                            )}
-                            <span className="text-sm font-medium">{toast.message}</span>
+                            {toast.type === 'success' && <CheckCircle size={20} strokeWidth={3} />}
+                            {toast.type === 'error' && <AlertCircle size={20} strokeWidth={3} />}
+                            {toast.type === 'info' && <AlertCircle size={20} strokeWidth={3} />}
+                            <span className="text-sm font-bold uppercase">{toast.message}</span>
                             <button
                                 onClick={() => removeToast(toast.id)}
-                                className="ml-2 opacity-50 hover:opacity-100"
+                                className="ml-2 hover:opacity-70"
                             >
-                                <X size={16} />
+                                <X size={16} strokeWidth={3} />
                             </button>
                         </motion.div>
                     ))}

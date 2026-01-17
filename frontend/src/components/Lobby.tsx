@@ -23,7 +23,6 @@ export const Lobby = ({ onJoin }: LobbyProps) => {
     const [username, setUsername] = useState('');
     const [showTutorial, setShowTutorial] = useState(true);
 
-    // Hide tutorial after first visit
     useEffect(() => {
         const hasSeenTutorial = localStorage.getItem('prismecho_tutorial_seen');
         if (hasSeenTutorial) {
@@ -36,21 +35,20 @@ export const Lobby = ({ onJoin }: LobbyProps) => {
         localStorage.setItem('prismecho_tutorial_seen', 'true');
     };
 
-    // Preset rooms
     const presetRooms: Room[] = [
         {
             id: 'room-a',
             title: 'Philosophical Debate',
             topic: 'Is AI capable of true creativity?',
             participants: 12,
-            color: 'from-blue-500 to-cyan-400'
+            color: 'bg-brutal-blue'
         },
         {
             id: 'room-b',
             title: 'Policy Summit',
             topic: 'Universal Basic Income vs. Guaranteed Jobs',
             participants: 8,
-            color: 'from-purple-500 to-pink-400'
+            color: 'bg-brutal-purple'
         }
     ];
 
@@ -64,7 +62,7 @@ export const Lobby = ({ onJoin }: LobbyProps) => {
             opening_question: room.opening_question,
             audioUrl: room.audioUrl,
             participants: 0,
-            color: 'from-emerald-500 to-teal-400'
+            color: 'bg-brutal-green'
         };
         setCustomRooms(prev => [...prev, newRoom]);
     };
@@ -74,12 +72,20 @@ export const Lobby = ({ onJoin }: LobbyProps) => {
         onJoin(room.id, room, displayName);
     };
 
-    return (
-        <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-8 relative overflow-hidden">
-            {/* Ambient Background */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,243,255,0.1),transparent_70%)] pointer-events-none" />
+    // Color mapping for cards
+    const cardColors = ['bg-brutal-yellow', 'bg-brutal-pink', 'bg-brutal-cyan', 'bg-brutal-orange'];
 
-            {/* How to Use Tutorial */}
+    return (
+        <div className="min-h-screen bg-brutal-cream flex flex-col items-center justify-center p-8 relative overflow-hidden">
+            {/* Grid Pattern Background */}
+            <div className="absolute inset-0 opacity-30 pointer-events-none"
+                style={{
+                    backgroundImage: 'linear-gradient(#1a1a1a 1px, transparent 1px), linear-gradient(90deg, #1a1a1a 1px, transparent 1px)',
+                    backgroundSize: '40px 40px'
+                }}
+            />
+
+            {/* How to Use Tutorial - Neo-brutalist style */}
             <AnimatePresence>
                 {showTutorial && (
                     <motion.div
@@ -88,24 +94,24 @@ export const Lobby = ({ onJoin }: LobbyProps) => {
                         exit={{ opacity: 0, y: -20 }}
                         className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-2xl px-4"
                     >
-                        <div className="bg-gradient-to-r from-neon-blue/20 to-purple-500/20 border border-neon-blue/30 rounded-2xl p-6 backdrop-blur-xl shadow-2xl">
+                        <div className="bg-brutal-yellow border-brutal shadow-brutal-lg p-6 relative">
                             <button
                                 onClick={dismissTutorial}
-                                className="absolute top-4 right-4 text-white/50 hover:text-white"
+                                className="absolute top-3 right-3 w-8 h-8 bg-brutal-white border-2 border-brutal-black flex items-center justify-center hover:bg-brutal-pink transition-colors"
                             >
-                                <X size={20} />
+                                <X size={16} />
                             </button>
                             <div className="flex items-start gap-4">
-                                <div className="w-10 h-10 rounded-full bg-neon-blue/20 flex items-center justify-center shrink-0">
-                                    <HelpCircle className="text-neon-blue" size={20} />
+                                <div className="w-12 h-12 bg-brutal-white border-brutal flex items-center justify-center shrink-0">
+                                    <HelpCircle className="text-brutal-black" size={24} />
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-bold text-white mb-2">Welcome to PrismEcho!</h3>
-                                    <div className="text-white/70 text-sm space-y-2">
-                                        <p><strong className="text-neon-blue">🎧 Move your cursor</strong> to navigate the spatial audio landscape</p>
-                                        <p><strong className="text-neon-blue">⏱️ Stay near a node</strong> for 3 seconds to unlock the reply button</p>
-                                        <p><strong className="text-neon-blue">🎤 Record your voice</strong> - AI will summarize your response</p>
-                                        <p><strong className="text-neon-blue">🔗 Your reply</strong> will connect to the node you're listening to</p>
+                                    <h3 className="text-xl font-bold text-brutal-black mb-3 uppercase">How to Use PrismEcho</h3>
+                                    <div className="text-brutal-black text-sm space-y-2 font-medium">
+                                        <p>🎧 <strong>Move cursor</strong> → Navigate the audio space</p>
+                                        <p>⏱️ <strong>Stay near a node</strong> → Unlock reply after 3 seconds</p>
+                                        <p>🎤 <strong>Press R</strong> → Record your voice reply</p>
+                                        <p>🔗 <strong>Your reply</strong> → Connects to the parent node</p>
                                     </div>
                                 </div>
                             </div>
@@ -114,18 +120,19 @@ export const Lobby = ({ onJoin }: LobbyProps) => {
                 )}
             </AnimatePresence>
 
+            {/* Title */}
             <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
+                transition={{ duration: 0.5 }}
                 className="z-10 text-center mb-8"
             >
-                <h1 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-neon-blue to-purple-400 mb-4 tracking-tight drop-shadow-[0_0_15px_rgba(0,243,255,0.5)]">
-                    PrismEcho
+                <h1 className="text-7xl font-bold text-brutal-black mb-4 uppercase tracking-tight">
+                    Prism<span className="bg-brutal-blue text-brutal-white px-2">Echo</span>
                 </h1>
-                <p className="text-xl text-slate-400 max-w-lg mx-auto leading-relaxed">
-                    Spatial Negotiation Interface. <br />
-                    <span className="text-white/80">Listen deeper before you reply.</span>
+                <p className="text-xl text-brutal-black max-w-lg mx-auto font-medium">
+                    Spatial Negotiation Interface<br />
+                    <span className="bg-brutal-yellow px-2 py-1 inline-block mt-2 border-2 border-brutal-black">Listen deeper before you reply.</span>
                 </p>
             </motion.div>
 
@@ -133,18 +140,18 @@ export const Lobby = ({ onJoin }: LobbyProps) => {
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
+                transition={{ delay: 0.2 }}
                 className="z-10 mb-8 w-full max-w-sm"
             >
                 <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={20} />
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-brutal-black" size={20} />
                     <input
                         type="text"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        placeholder="Enter your name (optional)"
+                        placeholder="Enter your name"
                         maxLength={20}
-                        className="w-full pl-12 pr-4 py-3 rounded-full bg-white/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-neon-blue focus:ring-1 focus:ring-neon-blue transition-colors text-center"
+                        className="w-full pl-12 pr-4 py-3 bg-brutal-white border-brutal shadow-brutal text-brutal-black placeholder-brutal-black/50 focus:outline-none focus:shadow-brutal-blue font-medium text-center"
                     />
                 </div>
             </motion.div>
@@ -154,45 +161,44 @@ export const Lobby = ({ onJoin }: LobbyProps) => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 onClick={() => setIsCreateModalOpen(true)}
-                className="mb-8 px-6 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 text-white font-bold flex items-center gap-2 hover:opacity-90 transition-opacity z-10 shadow-[0_0_30px_rgba(16,185,129,0.3)]"
+                className="mb-8 px-8 py-4 bg-brutal-green border-brutal shadow-brutal text-brutal-black font-bold uppercase flex items-center gap-2 hover:translate-x-1 hover:translate-y-1 hover:shadow-brutal-sm transition-all z-10"
             >
-                <Plus size={20} />
+                <Plus size={20} strokeWidth={3} />
                 Create New Room
             </motion.button>
 
+            {/* Room Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 z-10 w-full max-w-4xl">
                 {allRooms.map((room, idx) => (
                     <motion.button
                         key={room.id}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: idx * 0.1 }}
                         onClick={() => handleJoinRoom(room)}
-                        className="group relative h-64 rounded-3xl p-1 bg-gradient-to-br from-white/10 to-white/5 hover:from-white/20 hover:to-white/10 border border-white/10 backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(0,0,0,0.5)] text-left"
+                        className={`group relative h-64 p-6 ${cardColors[idx % cardColors.length]} border-brutal-thick shadow-brutal-lg hover:translate-x-1 hover:translate-y-1 hover:shadow-brutal transition-all text-left`}
                     >
-                        <div className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${room.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300 pointer-events-none`} />
-
-                        <div className="h-full flex flex-col justify-between p-7 relative z-20">
+                        <div className="h-full flex flex-col justify-between">
                             <div>
-                                <div className={`flex items-center gap-2 text-xs font-bold uppercase tracking-wider mb-3 bg-gradient-to-r ${room.color} bg-clip-text text-transparent`}>
-                                    <Mic size={14} className="text-white/50" />
-                                    {room.id.startsWith('custom-') ? 'Custom Room' : 'Live Session'}
+                                <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider mb-3 bg-brutal-white border-2 border-brutal-black px-2 py-1">
+                                    <Mic size={12} />
+                                    {room.id.startsWith('custom-') ? 'Custom' : 'Live'}
                                 </div>
-                                <h3 className="text-3xl font-bold text-white mb-2 leading-tight group-hover:text-neon-blue transition-colors">
+                                <h3 className="text-3xl font-bold text-brutal-black mb-2 uppercase leading-tight">
                                     {room.title}
                                 </h3>
-                                <p className="text-slate-400 group-hover:text-slate-300 transition-colors">
+                                <p className="text-brutal-black/80 font-medium">
                                     {room.topic}
                                 </p>
                             </div>
 
-                            <div className="flex items-center justify-between border-t border-white/10 pt-4 mt-4">
-                                <div className="flex items-center gap-2 text-white/50 text-sm">
-                                    <Users size={16} />
+                            <div className="flex items-center justify-between border-t-3 border-brutal-black pt-4 mt-4">
+                                <div className="flex items-center gap-2 text-brutal-black font-bold text-sm">
+                                    <Users size={16} strokeWidth={3} />
                                     <span>{room.participants} listeners</span>
                                 </div>
-                                <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-neon-blue group-hover:text-black transition-all">
-                                    <ArrowRight size={20} />
+                                <div className="w-12 h-12 bg-brutal-white border-brutal flex items-center justify-center group-hover:bg-brutal-black group-hover:text-brutal-white transition-colors">
+                                    <ArrowRight size={24} strokeWidth={3} />
                                 </div>
                             </div>
                         </div>
@@ -200,14 +206,14 @@ export const Lobby = ({ onJoin }: LobbyProps) => {
                 ))}
             </div>
 
-            {/* Powered By */}
+            {/* Footer */}
             <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
-                className="text-white/30 text-xs mt-12 z-10"
+                className="text-brutal-black/50 text-sm mt-12 z-10 font-bold uppercase tracking-widest"
             >
-                Powered by <span className="text-white/50">Gemini AI</span> • Built for thoughtful conversations
+                Powered by <span className="bg-brutal-black text-brutal-white px-2 py-0.5">Gemini AI</span>
             </motion.p>
 
             {/* Create Room Modal */}

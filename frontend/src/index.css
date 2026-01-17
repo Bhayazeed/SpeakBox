@@ -1,13 +1,24 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap');
+
+/* ============================================================================
+   NEO-BRUTALISM DESIGN SYSTEM FOR PRISMECHO
+   
+   Key Principles:
+   - Bold black borders (3-4px)
+   - Hard offset shadows (no blur)
+   - Flat, vibrant colors (no gradients)
+   - Chunky, playful aesthetic
+   ============================================================================ */
 
 body {
   margin: 0;
   padding: 0;
-  background-color: #050505;
-  color: #ffffff;
+  background-color: #fffef9;
+  /* Warm off-white */
+  color: #1a1a1a;
   overflow: hidden;
-  /* Prevent scrolling for the canvas app */
-  font-family: 'Inter', sans-serif;
+  font-family: 'Space Grotesk', sans-serif;
 }
 
 #root {
@@ -15,30 +26,159 @@ body {
   height: 100vh;
 }
 
+/* ============================================================================
+   NEO-BRUTALISM COLOR PALETTE
+   ============================================================================ */
 @theme {
-  --color-glass-100: rgba(255, 255, 255, 0.1);
-  --color-glass-200: rgba(255, 255, 255, 0.2);
-  --color-glass-300: rgba(255, 255, 255, 0.3);
-  --color-glass-dark: rgba(0, 0, 0, 0.5);
+  /* Primary Colors - Flat & Vibrant */
+  --color-brutal-yellow: #FFE600;
+  --color-brutal-blue: #0066FF;
+  --color-brutal-pink: #FF4D6D;
+  --color-brutal-green: #00D26A;
+  --color-brutal-purple: #9747FF;
+  --color-brutal-orange: #FF6B35;
+  --color-brutal-cyan: #00C2FF;
 
-  --color-neon-blue: #00f3ff;
-  --color-neon-purple: #bc13fe;
-  --color-neon-pink: #ff0055;
+  /* Neutrals */
+  --color-brutal-black: #1a1a1a;
+  --color-brutal-white: #fffef9;
+  --color-brutal-cream: #FFF8E7;
+  --color-brutal-gray: #E5E5E5;
 
-  --backdrop-blur-xs: 2px;
+  /* Legacy compatibility */
+  --color-neon-blue: #0066FF;
+  --color-neon-purple: #9747FF;
+  --color-neon-pink: #FF4D6D;
 
-  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  --animate-float: float 6s ease-in-out infinite;
+  /* Glass (now solid with transparency) */
+  --color-glass-100: rgba(255, 255, 255, 0.9);
+  --color-glass-200: rgba(255, 255, 255, 0.95);
+  --color-glass-300: rgba(255, 255, 255, 1);
+  --color-glass-dark: rgba(26, 26, 26, 0.95);
 
-  @keyframes float {
+  --backdrop-blur-xs: 0px;
+}
 
-    0%,
-    100% {
-      transform: translateY(0);
-    }
+/* ============================================================================
+   NEO-BRUTALISM UTILITY CLASSES
+   ============================================================================ */
 
-    50% {
-      transform: translateY(-20px);
-    }
+/* Hard Shadow - The signature neo-brutalist effect */
+.shadow-brutal {
+  box-shadow: 4px 4px 0px #1a1a1a;
+}
+
+.shadow-brutal-sm {
+  box-shadow: 2px 2px 0px #1a1a1a;
+}
+
+.shadow-brutal-lg {
+  box-shadow: 6px 6px 0px #1a1a1a;
+}
+
+.shadow-brutal-xl {
+  box-shadow: 8px 8px 0px #1a1a1a;
+}
+
+/* Color shadows */
+.shadow-brutal-blue {
+  box-shadow: 4px 4px 0px #0066FF;
+}
+
+.shadow-brutal-pink {
+  box-shadow: 4px 4px 0px #FF4D6D;
+}
+
+.shadow-brutal-yellow {
+  box-shadow: 4px 4px 0px #FFE600;
+}
+
+/* Bold Borders */
+.border-brutal {
+  border: 3px solid #1a1a1a;
+}
+
+.border-brutal-thick {
+  border: 4px solid #1a1a1a;
+}
+
+/* Button Press Effect */
+.brutal-button {
+  border: 3px solid #1a1a1a;
+  box-shadow: 4px 4px 0px #1a1a1a;
+  transition: all 0.1s ease;
+}
+
+.brutal-button:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #1a1a1a;
+}
+
+.brutal-button:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0px 0px 0px #1a1a1a;
+}
+
+/* Card Style */
+.brutal-card {
+  background: #fffef9;
+  border: 3px solid #1a1a1a;
+  box-shadow: 6px 6px 0px #1a1a1a;
+}
+
+/* Input Style */
+.brutal-input {
+  border: 3px solid #1a1a1a;
+  background: #fffef9;
+  box-shadow: 3px 3px 0px #1a1a1a;
+}
+
+.brutal-input:focus {
+  outline: none;
+  box-shadow: 3px 3px 0px #0066FF;
+}
+
+/* Tag/Badge Style */
+.brutal-tag {
+  border: 2px solid #1a1a1a;
+  background: #FFE600;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* Animations - More mechanical, less floaty */
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
   }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-brutal {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* ============================================================================
+   DEBATE ROOM SPECIFIC STYLES
+   ============================================================================ */
+
+/* Spatial Canvas Background - Keep dark for contrast */
+.spatial-canvas-bg {
+  background: #1a1a1a;
+  background-image:
+    radial-gradient(circle, #333 1px, transparent 1px);
+  background-size: 40px 40px;
 }
