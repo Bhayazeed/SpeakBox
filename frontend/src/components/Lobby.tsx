@@ -1,13 +1,27 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Users, Mic, ArrowRight } from 'lucide-react';
+import { Users, Mic, ArrowRight, Plus } from 'lucide-react';
+import { CreateRoomModal } from './CreateRoomModal';
+
+interface Room {
+    id: string;
+    title: string;
+    topic: string;
+    opening_question?: string;
+    participants: number;
+    color: string;
+}
 
 interface LobbyProps {
-    onJoin: (roomId: string) => void;
+    onJoin: (roomId: string, roomData?: Room) => void;
 }
 
 export const Lobby = ({ onJoin }: LobbyProps) => {
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [customRooms, setCustomRooms] = useState<Room[]>([]);
 
-    const rooms = [
+    // Preset rooms
+    const presetRooms: Room[] = [
         {
             id: 'room-a',
             title: 'Philosophical Debate',
@@ -23,6 +37,20 @@ export const Lobby = ({ onJoin }: LobbyProps) => {
             color: 'from-purple-500 to-pink-400'
         }
     ];
+
+    const allRooms = [...presetRooms, ...customRooms];
+
+    const handleRoomCreated = (room: { id: string; title: string; topic: string; opening_question: string }) => {
+        const newRoom: Room = {
+            id: room.id,
+            title: room.title,
+            topic: room.topic,
+            opening_question: room.opening_question,
+            participants: 0,
+            color: 'from-emerald-500 to-teal-400'
+        };
+        setCustomRooms(prev => [...prev, newRoom]);
+    };
 
     return (
         <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-8 relative overflow-hidden">
@@ -44,24 +72,34 @@ export const Lobby = ({ onJoin }: LobbyProps) => {
                 </p>
             </motion.div>
 
+            {/* Create Room Button */}
+            <motion.button
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                onClick={() => setIsCreateModalOpen(true)}
+                className="mb-8 px-6 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 text-white font-bold flex items-center gap-2 hover:opacity-90 transition-opacity z-10 shadow-[0_0_30px_rgba(16,185,129,0.3)]"
+            >
+                <Plus size={20} />
+                Create New Room
+            </motion.button>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 z-10 w-full max-w-4xl">
-                {rooms.map((room, idx) => (
+                {allRooms.map((room, idx) => (
                     <motion.button
                         key={room.id}
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: idx * 0.1 }}
-                        onClick={() => onJoin(room.id)}
+                        onClick={() => onJoin(room.id, room)}
                         className="group relative h-64 rounded-3xl p-1 bg-gradient-to-br from-white/10 to-white/5 hover:from-white/20 hover:to-white/10 border border-white/10 backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(0,0,0,0.5)] text-left"
                     >
-                        <div className="absolute inset-0 rounded-3xl bg-gradient-to-br opacity-0 group-hover:opacity-10 transition-opacity duration-300 pointer-events-none"
-                            style={{ backgroundImage: `linear-gradient(to bottom right, ${room.color})` }}
-                        />
+                        <div className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${room.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300 pointer-events-none`} />
 
                         <div className="h-full flex flex-col justify-between p-7 relative z-20">
                             <div>
                                 <div className={`flex items-center gap-2 text-xs font-bold uppercase tracking-wider mb-3 bg-gradient-to-r ${room.color} bg-clip-text text-transparent`}>
-                                    <Mic size={14} className="text-white/50" /> Live Session
+                                    <Mic size={14} className="text-white/50" />
+                                    {room.id.startsWith('custom-') ? 'Custom Room' : 'Live Session'}
                                 </div>
                                 <h3 className="text-3xl font-bold text-white mb-2 leading-tight group-hover:text-neon-blue transition-colors">
                                     {room.title}
@@ -84,6 +122,13 @@ export const Lobby = ({ onJoin }: LobbyProps) => {
                     </motion.button>
                 ))}
             </div>
+
+            {/* Create Room Modal */}
+            <CreateRoomModal
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+                onRoomCreated={handleRoomCreated}
+            />
         </div>
     );
 };

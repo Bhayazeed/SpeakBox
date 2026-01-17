@@ -20,8 +20,8 @@ export const BlurOverlay = ({ minDistance, maxDistance }: BlurOverlayProps) => {
 
     const springDistance = useSpring(distance, { stiffness: 50, damping: 20 });
 
-    const blurAmount = useTransform(springDistance, [0, maxDistance], ["0px", "20px"]);
-    const opacity = useTransform(springDistance, [0, maxDistance], [0, 0.8]);
+    const blurAmount = useTransform(springDistance, [0, maxDistance], ["0px", "10px"]); // Reduced from 20px
+    const opacity = useTransform(springDistance, [0, maxDistance], [0, 0.5]); // Reduced from 0.8
 
     return (
         <motion.div

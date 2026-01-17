@@ -7,12 +7,21 @@ import { Howler } from 'howler';
 import { ReplyModal } from './ReplyModal';
 import { LogOut } from 'lucide-react';
 
+interface RoomData {
+    id: string;
+    title: string;
+    topic: string;
+    opening_question?: string;
+    color?: string;
+}
+
 interface SpatialCanvasProps {
     roomId: string;
+    roomData?: RoomData | null;
     onExit: () => void;
 }
 
-export const SpatialCanvas = ({ roomId, onExit }: SpatialCanvasProps) => {
+export const SpatialCanvas = ({ roomId, roomData, onExit }: SpatialCanvasProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
@@ -24,15 +33,30 @@ export const SpatialCanvas = ({ roomId, onExit }: SpatialCanvasProps) => {
     // Access state from store (hooked up to WebSocket in App or here)
     const { nodes, users } = useAppState();
 
-    // For demo purposes, let's seed a node if empty
+    // Seed nodes based on room - RESET when entering a new room
     useEffect(() => {
-        if (nodes.length === 0) {
+        // Custom room - use opening question from roomData
+        if (roomData && roomId.startsWith('custom-')) {
+            const hue = Math.floor(Math.random() * 360);
             useAppState.getState().setNodes([
-                { id: '1', x: window.innerWidth / 2, y: window.innerHeight / 2, color: '#00f3ff', text: "Welcome to PrismEcho. Navigate here to reply." },
-                { id: '2', x: window.innerWidth / 4, y: window.innerHeight / 3, color: '#bc13fe', text: "Another voice node." }
+                {
+                    id: '1',
+                    x: window.innerWidth / 2,
+                    y: window.innerHeight / 2,
+                    color: `hsl(${hue}, 80%, 60%)`,
+                    text: roomData.opening_question || roomData.topic
+                }
+            ]);
+        } else if (roomId === 'room-a') {
+            useAppState.getState().setNodes([
+                { id: '1', x: window.innerWidth / 2, y: window.innerHeight / 2, color: '#00f3ff', text: "Is free will an illusion? Share your perspective." }
+            ]);
+        } else if (roomId === 'room-b') {
+            useAppState.getState().setNodes([
+                { id: '2', x: window.innerWidth / 2, y: window.innerHeight / 2, color: '#bc13fe', text: "Should AI be regulated? Debate the policy." }
             ]);
         }
-    }, []);
+    }, [roomId, roomData]);
 
     // Local mouse tracking
     const handleMouseMove = (e: React.MouseEvent) => {
@@ -51,15 +75,19 @@ export const SpatialCanvas = ({ roomId, onExit }: SpatialCanvasProps) => {
         const originX = parentNode ? parentNode.x : mousePos.x;
         const originY = parentNode ? parentNode.y : mousePos.y;
 
-        // Spawn at a fixed distance (250px) at a random angle
+        // Spawn at a fixed distance (400px) at a random angle - increased to prevent overlap
         const angle = Math.random() * Math.PI * 2;
-        const offset = 250;
+        const offset = 400;
+
+        // Generate Random Neon Color
+        const hue = Math.floor(Math.random() * 360);
+        const randomColor = `hsl(${hue}, 100%, 60%)`;
 
         const newUserNode = {
             id: newNodeId,
             x: originX + Math.cos(angle) * offset,
             y: originY + Math.sin(angle) * offset,
-            color: '#00ff88',
+            color: randomColor,
             text: "User Reply",
             audioUrl: url,
             parentId: focusedNodeId || undefined
@@ -88,21 +116,46 @@ export const SpatialCanvas = ({ roomId, onExit }: SpatialCanvasProps) => {
     // Calculate closest node for blur effect
     const minDistance = Object.values(distances).length > 0 ? Math.min(...Object.values(distances)) : 1000;
 
-    // Focus / Reply Logic
+    // Focus / Reply Logic with Momentum Lock
     useEffect(() => {
-        // Find if we are close enough to any node to "Focus"
-        // Increased to 250 to allow reaching the button without losing focus
         const CLOSE_THRESHOLD = 250;
-        const closestNodeId = Object.keys(distances).find(id => distances[id] < CLOSE_THRESHOLD);
+        const ABANDON_THRESHOLD = 400; // Must move this far to break momentum lock
+        const MOMENTUM_LOCK_PERCENT = 50; // Lock in after 50% progress
 
-        if (closestNodeId) {
-            setFocusedNodeId(closestNodeId);
+        // Get all nodes within close threshold and find the closest
+        const nodesWithinRange = Object.entries(distances)
+            .filter(([_, dist]) => dist < CLOSE_THRESHOLD)
+            .sort((a, b) => a[1] - b[1]);
+
+        const closestNodeId = nodesWithinRange.length > 0 ? nodesWithinRange[0][0] : null;
+
+        // If we have momentum lock (timer > 50%), only break focus if we move very far away
+        const currentFocusDistance = focusedNodeId ? distances[focusedNodeId] : Infinity;
+        const hasMomentumLock = focusTimer >= MOMENTUM_LOCK_PERCENT;
+
+        if (hasMomentumLock && focusedNodeId) {
+            // Only break lock if we move beyond the abandon threshold
+            if (currentFocusDistance > ABANDON_THRESHOLD) {
+                setFocusedNodeId(null);
+                setFocusTimer(0);
+                setCanReply(false);
+            }
+            // Otherwise, keep the current focus (momentum lock active)
         } else {
-            setFocusedNodeId(null);
-            setFocusTimer(0);
-            setCanReply(false);
+            // Normal behavior: focus on closest node
+            if (closestNodeId) {
+                if (closestNodeId !== focusedNodeId) {
+                    setFocusTimer(0); // Reset timer when switching
+                    setCanReply(false);
+                }
+                setFocusedNodeId(closestNodeId);
+            } else {
+                setFocusedNodeId(null);
+                setFocusTimer(0);
+                setCanReply(false);
+            }
         }
-    }, [distances]);
+    }, [distances, focusTimer, focusedNodeId]);
 
     // Modal State
     const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
@@ -174,9 +227,10 @@ export const SpatialCanvas = ({ roomId, onExit }: SpatialCanvasProps) => {
                             y1={parent.y}
                             x2={node.x}
                             y2={node.y}
-                            stroke="rgba(0, 243, 255, 0.2)"
-                            strokeWidth="1"
-                            strokeDasharray="5,5"
+                            stroke={node.color}
+                            strokeWidth="3"
+                            strokeOpacity="0.6"
+                            strokeDasharray="8,8"
                         />
                     );
                 })}
@@ -186,16 +240,16 @@ export const SpatialCanvas = ({ roomId, onExit }: SpatialCanvasProps) => {
             {nodes.map(node => (
                 <motion.div
                     key={node.id}
-                    className="absolute rounded-full shadow-[0_0_30px_rgba(0,0,0,0.5)] flex items-center justify-center group"
+                    className="absolute rounded-full shadow-[0_0_50px_rgba(0,0,0,0.8)] flex items-center justify-center group"
                     style={{
                         left: node.x,
                         top: node.y,
-                        width: 60,
-                        height: 60,
+                        width: 80, // Increased from 60
+                        height: 80, // Increased from 60
                         x: '-50%',
                         y: '-50%',
                         backgroundColor: node.color,
-                        boxShadow: `0 0 20px ${node.color}, inset 0 0 20px rgba(255,255,255,0.5)`
+                        boxShadow: `0 0 40px ${node.color}, inset 0 0 20px rgba(255,255,255,0.8)`
                     }}
                     animate={{
                         scale: [1, 1.1, 1],
