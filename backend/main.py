@@ -10,7 +10,7 @@ import uuid
 # Load environment variables
 load_dotenv()
 
-app = FastAPI(title="PrismEcho Backend")
+app = FastAPI(title="SpeakBox Backend")
 manager = ConnectionManager()
 moderation_service = ModerationService()
 llm_service = LLMService()
@@ -51,7 +51,7 @@ class ModerateResponse(BaseModel):
 
 @app.get("/")
 async def get():
-    return {"message": "PrismEcho Backend is running"}
+    return {"message": "SpeakBox Backend is running"}
 
 @app.get("/api/rooms")
 async def get_rooms():

@@ -4,11 +4,11 @@ from google import genai
 from google.genai import types
 
 # ============================================================================
-# PRISMECHO AI SERVICE - Consistent Prompts with Best Practices
+# SPEAKBOX AI SERVICE - Consistent Prompts with Best Practices
 # ============================================================================
 
 # System context for all prompts
-SYSTEM_CONTEXT = """You are the AI assistant for PrismEcho, a spatial audio debate platform.
+SYSTEM_CONTEXT = """You are the AI assistant for SpeakBox, a spatial audio debate platform.
 Your responses must be:
 - CONCISE: Maximum 2-3 short bullet points or single sentences
 - NEUTRAL: No bias toward any perspective
@@ -114,7 +114,7 @@ Summarize the main point in 1-2 concise bullet points.
 
     # Prompt for generating opening questions
     OPENING_QUESTION_PROMPT = """<task>Generate Debate Opening Question</task>
-<context>Creating the first node for a PrismEcho debate room.</context>
+<context>Creating the first node for a SpeakBox debate room.</context>
 
 <topic>{topic}</topic>
 
