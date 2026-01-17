@@ -6,6 +6,7 @@ import { BlurOverlay } from './BlurOverlay';
 import { Howler } from 'howler';
 import { ReplyModal } from './ReplyModal';
 import { LogOut } from 'lucide-react';
+import { useToast } from './Toast';
 
 interface RoomData {
     id: string;
@@ -19,10 +20,11 @@ interface RoomData {
 interface SpatialCanvasProps {
     roomId: string;
     roomData?: RoomData | null;
+    username?: string;
     onExit: () => void;
 }
 
-export const SpatialCanvas = ({ roomId, roomData, onExit }: SpatialCanvasProps) => {
+export const SpatialCanvas = ({ roomId, roomData, username, onExit }: SpatialCanvasProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
@@ -65,6 +67,10 @@ export const SpatialCanvas = ({ roomId, roomData, onExit }: SpatialCanvasProps) 
         setMousePos({ x: e.clientX, y: e.clientY });
         // TODO: Send to WebSocket
     };
+
+    // Toast notifications
+    const { showToast } = useToast();
+
     // Handle reply from ReplyModal - now receives AI-processed audioUrl and summary
     const handleReply = (audioUrl: string, summary: string) => {
         const newNodeId = `reply-${Date.now()}`; // Unique ID
@@ -82,6 +88,7 @@ export const SpatialCanvas = ({ roomId, roomData, onExit }: SpatialCanvasProps) 
         const hue = Math.floor(Math.random() * 360);
         const randomColor = `hsl(${hue}, 100%, 60%)`;
 
+        const displayName = username || 'You';
         const newUserNode = {
             id: newNodeId,
             x: originX + Math.cos(angle) * offset,
@@ -89,10 +96,14 @@ export const SpatialCanvas = ({ roomId, roomData, onExit }: SpatialCanvasProps) 
             color: randomColor,
             text: summary, // AI-generated summary from backend
             audioUrl: audioUrl,
-            parentId: focusedNodeId || undefined
+            parentId: focusedNodeId || undefined,
+            author: displayName
         };
 
         useAppState.getState().setNodes([...nodes, newUserNode]);
+
+        // Show success toast
+        showToast(`✨ Reply added by ${displayName}`, 'success');
     };
 
     // Audio Logic
@@ -128,7 +139,7 @@ export const SpatialCanvas = ({ roomId, roomData, onExit }: SpatialCanvasProps) 
 
         const closestNodeId = nodesWithinRange.length > 0 ? nodesWithinRange[0][0] : null;
 
-        // If we have momentum lock (timer > 50%), only break focus if we move very far away
+        // If we have momentum lock (timer > 20%), only break focus if we move very far away
         const currentFocusDistance = focusedNodeId ? distances[focusedNodeId] : Infinity;
         const hasMomentumLock = focusTimer >= MOMENTUM_LOCK_PERCENT;
 
@@ -159,12 +170,24 @@ export const SpatialCanvas = ({ roomId, roomData, onExit }: SpatialCanvasProps) 
     // Modal State
     const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
 
-    // Keyboard Interaction
+    // Keyboard Hotkeys
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
+            // Space: Reply when timer is complete (original behavior)
             if (e.code === 'Space' && canReply && focusedNodeId) {
                 e.preventDefault();
                 setIsReplyModalOpen(true);
+            }
+
+            // R: INSTANT reply when near any node (bypasses timer)
+            if (e.code === 'KeyR' && focusedNodeId && !isReplyModalOpen) {
+                e.preventDefault();
+                setIsReplyModalOpen(true);
+            }
+
+            // Escape: Close modal
+            if (e.code === 'Escape' && isReplyModalOpen) {
+                setIsReplyModalOpen(false);
             }
         };
 
